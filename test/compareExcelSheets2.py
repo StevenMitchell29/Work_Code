@@ -9,10 +9,10 @@ def report_diff(x):
 
 def compareDevAndTest(devFile, testFile):
     #sc_maintain_category.xls
-    # devPath = "C:\Users\steven.mitchell\Desktop\Dev_Docs\\"
-    # testPath = "C:\Users\steven.mitchell\Desktop\Test_Docs\\"#
-    devPath = "C:\Users\steven.mitchell\Desktop\Dev_Diction\\"
-    testPath = "C:\Users\steven.mitchell\Desktop\Test_Diction\\"
+    devPath = "C:\Users\steven.mitchell\Desktop\Dev_Docs\\"
+    testPath = "C:\Users\steven.mitchell\Desktop\Test_Docs\\"#
+    # devPath = "C:\Users\steven.mitchell\Desktop\Dev_Diction\\"
+    # testPath = "C:\Users\steven.mitchell\Desktop\Test_Diction\\"
 
     devFile1 = devPath + devFile
     testFile1 = testPath + testFile
@@ -24,7 +24,7 @@ def compareDevAndTest(devFile, testFile):
     test['version'] = "test"
 
     firstColumn = ''.join(list(dev.columns[0]))
-    secondColumn = ''.join(list(dev.columns[1]))
+    # secondColumn = ''.join(list(dev.columns[1]))
     createdColumn = ''.join(list(dev.columns[-4]))
     # firstTwo = list(dev.columns[:2])
     # print firstTwo
@@ -51,45 +51,62 @@ def compareDevAndTest(devFile, testFile):
     dupes = dupes.reindex()
 
     #Flag all duplicated names
-    findAdditionAndDeletions=changes[firstColumn].isin(dupe_accts)
-
+    findDeletions=changes[firstColumn].isin(dupe_accts)
     #Identify the records that did not make it to test
-    removed_accounts = changes[(findAdditionAndDeletions == False) & (changes["version"] == "dev")]
+    removed_accounts = changes[(findDeletions == False) & (changes["version"] == "dev")]
 
-    # added_test_set = full_set.drop_duplicates(subset=columnList,keep='last')
-    # dupe_accts2 = added_test_set.set_index(firstColumn).index.get_duplicates()
-    #
+    changes2 = full_set.drop_duplicates(subset=columnList,keep='last')
+    dupe_accts2 = changes2.set_index(firstColumn).index.get_duplicates()
     # # Flag all duplicated names
-    # findAdditions = added_test_set[firstColumn].isin(dupe_accts2)
-    # added_accounts = added_test_set[(findAdditions == False) & (changes["version"] == "test")]
+    findAdditions = changes2[firstColumn].isin(dupe_accts2)
+    added_accounts = changes2[(findAdditions == False) & (changes["version"] == "test")]
 
-    #Identify added accounts
-    unchanged = changes[(findAdditionAndDeletions == False) & (changes["version"] == "test")]
+    #Identify unchanged accounts + added test accounts
+    both = changes2[changes2.version != 'dev']
+    # changes.subtract(removed_accounts)
+    both.to_excel('Both_Changes.xlsx', index=False)
+
+    bleh
+
+
+    Both_Test_And_Dev = AllTest_AllDev.set_index(columnList).index.get_duplicates()
+    both = AllTest_AllDev[(AllTest_AllDev[firstColumn].isin(Both_Test_And_Dev))] #& changes[secondColumn].isin(dupe_accts))]
+
+    both = AllTest_AllDev.duplicated()
+    # both = both.sort_values([firstColumn], ascending=True)
+    # both = both.reindex()
+
+
+    # unchanged = changes[(findDeletions == False) & (changes["version"] == "test")]
+    # unchanged = set(unchanged).symmetric_difference(added_accounts)
     # unchanged = unchanged[~unchanged.isin(added_accounts).all(1)]
+    # unchanged = unchanged[~unchanged.isin(added_accounts).all(1)]
+
+    # print unchanged[~unchanged.isin(added_accounts).all(1)]
 
     # print unchanged -added_accounts
 
     #Save the changes to excel but only include the columns we care about
     # Save the changes to excel but only include the columns we care about
     # print diff_output
-    # name = "C:\Users\steven.mitchell\Desktop\\Compare_Of_Folder\\" + "Compare_Of_" + devFile# + "x"
-    name = "C:\Users\steven.mitchell\Desktop\\Diction_Compare\\" + "Compare_Of_" + devFile# + "x"
+    name = "C:\Users\steven.mitchell\Desktop\\Compare_Of_Folder\\" + "Compare_Of_test_" + devFile# + "x"
+    # name = "C:\Users\steven.mitchell\Desktop\\Diction_Compare\\" + "Compare_Of_" + devFile# + "x"
 
     # print name
     writer = pd.ExcelWriter(name)
     dupes.to_excel(writer, "Edited or Duplicated Name", index=False)
-    removed_accounts.to_excel(writer, "Deleted", index=False)
-    # added_accounts.to_excel(writer, "Only Test", index=False)
-    unchanged.to_excel(writer, "Unchanged and Added", index=False)
+    removed_accounts.to_excel(writer, "Only Dev", index=False)
+    added_accounts.to_excel(writer, "Only Test", index=False)
+    both.to_excel(writer, "Unchanged from Dev to Test", index=False)
     writer.save()
     print('Done with:', devFile, ' comparison')
 
 
-# devPath = "C:\Users\steven.mitchell\Desktop\Dev_Docs\\"
-devPath = "C:\Users\steven.mitchell\Desktop\Dev_Diction\\"
+devPath = "C:\Users\steven.mitchell\Desktop\Dev_Docs\\"
+# devPath = "C:\Users\steven.mitchell\Desktop\Dev_Diction\\"
 devDirectory = os.listdir(devPath)
-# testPath = "C:\Users\steven.mitchell\Desktop\Test_Docs\\"
-testPath = "C:\Users\steven.mitchell\Desktop\Test_Diction\\"
+testPath = "C:\Users\steven.mitchell\Desktop\Test_Docs\\"
+# testPath = "C:\Users\steven.mitchell\Desktop\Test_Diction\\"
 
 testDirectory = os.listdir(testPath)
 
