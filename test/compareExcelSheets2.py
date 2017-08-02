@@ -62,17 +62,19 @@ def compareDevAndTest(devFile, testFile):
     added_accounts = changes2[(findAdditions == False) & (changes["version"] == "test")]
 
     #Identify unchanged accounts + added test accounts
-    both = changes2[changes2.version != 'dev']
+    both = changes[(findDeletions ==False)& (changes["version"]=="test")]
+    # both = changes2[changes2.version != 'dev']
     # changes.subtract(removed_accounts)
+    # both.to_excel('Both_Changes.xlsx', index=False)
+
+    # bleh
+
+
+    # Both_Test_And_Dev = AllTest_AllDev.set_index(columnList).index.get_duplicates()
+    # both = AllTest_AllDev[(AllTest_AllDev[firstColumn].isin(Both_Test_And_Dev))] #& changes[secondColumn].isin(dupe_accts))]
     both.to_excel('Both_Changes.xlsx', index=False)
-
     bleh
-
-
-    Both_Test_And_Dev = AllTest_AllDev.set_index(columnList).index.get_duplicates()
-    both = AllTest_AllDev[(AllTest_AllDev[firstColumn].isin(Both_Test_And_Dev))] #& changes[secondColumn].isin(dupe_accts))]
-
-    both = AllTest_AllDev.duplicated()
+    # both = AllTest_AllDev.duplicated()
     # both = both.sort_values([firstColumn], ascending=True)
     # both = both.reindex()
 
