@@ -59,10 +59,28 @@ def compareDevAndTest(devFile, testFile):
     dupe_accts2 = changes2.set_index(firstColumn).index.get_duplicates()
     # # Flag all duplicated names
     findAdditions = changes2[firstColumn].isin(dupe_accts2)
-    added_accounts = changes2[(findAdditions == False) & (changes["version"] == "test")]
+    added_accounts = changes2[(findAdditions == False) & (changes2["version"] == "test")]#TODO look at the last changes2
+    # added_accounts.to_excel('Both_Changes.xlsx', index=False)
 
     #Identify unchanged accounts + added test accounts
     both = changes[(findDeletions ==False)& (changes["version"]=="test")]
+    both.to_excel('Both_Changes.xlsx', index=False)
+
+
+    full_Unchanged = pd.merge(changes,changes2, how='inner',on=columnList)
+    full_Unchanged.to_excel('Both_Changes1.xlsx', index=False)
+    # todo I believe that trying is the real deal.
+    trying = full_Unchanged[(full_Unchanged.version_x=="test") & (full_Unchanged.version_y=="dev")]
+    trying.to_excel('Both_Changes2.xlsx', index=False)
+
+
+    bleh
+    # changes3 = full_Unchanged.drop(added_accounts)
+    changes3 = both[~both[added_accounts].isin(added_accounts)]
+    changes3.to_excel('Both_Changes2.xlsx', index=False)
+
+    bleh
+
     # both = changes2[changes2.version != 'dev']
     # changes.subtract(removed_accounts)
     # both.to_excel('Both_Changes.xlsx', index=False)
@@ -72,8 +90,8 @@ def compareDevAndTest(devFile, testFile):
 
     # Both_Test_And_Dev = AllTest_AllDev.set_index(columnList).index.get_duplicates()
     # both = AllTest_AllDev[(AllTest_AllDev[firstColumn].isin(Both_Test_And_Dev))] #& changes[secondColumn].isin(dupe_accts))]
-    both.to_excel('Both_Changes.xlsx', index=False)
-    bleh
+    # both.to_excel('Both_Changes.xlsx', index=False)
+    # bleh
     # both = AllTest_AllDev.duplicated()
     # both = both.sort_values([firstColumn], ascending=True)
     # both = both.reindex()
@@ -91,7 +109,7 @@ def compareDevAndTest(devFile, testFile):
     #Save the changes to excel but only include the columns we care about
     # Save the changes to excel but only include the columns we care about
     # print diff_output
-    name = "C:\Users\steven.mitchell\Desktop\\Compare_Of_Folder\\" + "Compare_Of_test_" + devFile# + "x"
+    name = "C:\Users\steven.mitchell\Desktop\\Compare_Of_Folder\\" + "Compare_Of_" + devFile# + "x"
     # name = "C:\Users\steven.mitchell\Desktop\\Diction_Compare\\" + "Compare_Of_" + devFile# + "x"
 
     # print name
