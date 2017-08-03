@@ -92,5 +92,6 @@ testDirectory = os.listdir(testPath)
 
 for devFile, testFile in zip(devDirectory,testDirectory):
     # print devFile, testFile
+    print('Starting:', devFile, ' comparison')
     compareDevAndTest(devFile,testFile)
     # print "Done with 1 interation"
