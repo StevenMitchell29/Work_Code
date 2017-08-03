@@ -33,52 +33,30 @@ def compareDevAndTest(devFile, testFile):
 
     # Drop all the duplicates, but keep the test version if so
     changes = full_set.drop_duplicates(subset=columnList)
-
-    #We want to know where the duplicates are --> changes or duplicate named records
-    # dupe_accts = changes.set_index('Name').index.get_duplicates()
-    dupe_accts = changes.set_index(firstColumn,createdColumn).index.get_duplicates()
-
-    # #Get all the duplicate rows
-    # # dupes = changes[changes[secondColumn].isin(dupe_accts)]
-    # dupes = changes[(changes[firstColumn].isin(dupe_accts))] #& changes[secondColumn].isin(dupe_accts))]
-    #
-    # dupes = dupes.sort_values([firstColumn], ascending=True)
-    # dupes = dupes.reindex()
-
-    #Flag all duplicated names
-    findDeletions=changes[firstColumn].isin(dupe_accts)
-    #Identify the records that did not make it to test
-    removed_accounts = changes[(findDeletions == False) & (changes["version"] == "dev")]
-
+    # drop all the duplicates, but keep the dev version if so
     changes2 = full_set.drop_duplicates(subset=columnList,keep='last')
-    dupe_accts2 = changes2.set_index(firstColumn).index.get_duplicates()
-    # # Flag all duplicated names
-    findAdditions = changes2[firstColumn].isin(dupe_accts2)
-    added_accounts = changes2[(findAdditions == False) & (changes2["version"] == "test")]#TODO look at the last changes2
-    # added_accounts.to_excel('Both_Changes.xlsx', index=False)
 
-    #Identify unchanged accounts + added test accounts
-    both = changes[(findDeletions ==False)& (changes["version"]=="test")]
-    both.to_excel('Both_Changes.xlsx', index=False)
-
-
+    # merge the sets together
     full_Unchanged = pd.merge(changes,changes2, how='inner',on=columnList)
+    # and find all of the records that were unchanged from dev to test
     unchanged = full_Unchanged[(full_Unchanged.version_x=="test") & (full_Unchanged.version_y=="dev")]
-
+    # get all the duplicate names and creation dates that appear in both
+    # TODO this may not catch all records that are the same if they do not have the same creation date
     duplicate_Names = full_Unchanged.set_index(firstColumn, createdColumn).index.get_duplicates()
-
-    # Get all the duplicate rows
-    duplicate = full_Unchanged[(full_Unchanged[firstColumn].isin(duplicate_Names))]  # & changes[secondColumn].isin(dupe_accts))]
+    # Get all the duplicate or edited rows
+    duplicate = full_Unchanged[(full_Unchanged[firstColumn].isin(duplicate_Names))]
     duplicate = duplicate.sort_values([firstColumn], ascending=True)
     duplicate = duplicate.reindex()
     # duplicate.to_excel('duplicate.xlsx', index=False)
 
+    # get all the entries that appear in test only and not in duplicate
     test_only = full_Unchanged[(full_Unchanged.version_x=="test") & (full_Unchanged.version_y=="test")]
     # test_only.to_excel('test_only1.xlsx', index=False)
     test_only = test_only[-test_only.isin(duplicate_Names)]
     test_only.dropna(subset=[firstColumn], inplace=True)
     # test_only.to_excel('test_only2.xlsx', index=False)
 
+    # get all records that appear in dev only
     dev_only = full_Unchanged[(full_Unchanged.version_x=="dev") & (full_Unchanged.version_y=="dev")]
     # test_only.to_excel('test_only1.xlsx', index=False)
     dev_only = dev_only[-dev_only.isin(duplicate_Names)]
