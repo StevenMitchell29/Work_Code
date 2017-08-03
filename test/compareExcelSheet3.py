@@ -49,8 +49,13 @@ def compareDevAndTest(devFile, testFile):
     duplicate = duplicate.reindex()
     # duplicate.to_excel('duplicate.xlsx', index=False)
 
+    # remove all the entries from unchaged so they only appear in duplicates
+    unchanged = unchanged[-unchanged.isin(duplicate_Names)]
+    unchanged.dropna(subset=[firstColumn], inplace=True)
+    # test_only.to_excel('test_only2.xlsx', index=False)
+
     # get all the entries that appear in test only and not in duplicate
-    test_only = full_Unchanged[(full_Unchanged.version_x=="test") & (full_Unchanged.version_y=="test")]
+    test_only = full_Unchanged[(full_Unchanged.version_x == "test") & (full_Unchanged.version_y == "test")]
     # test_only.to_excel('test_only1.xlsx', index=False)
     test_only = test_only[-test_only.isin(duplicate_Names)]
     test_only.dropna(subset=[firstColumn], inplace=True)
