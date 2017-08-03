@@ -24,31 +24,26 @@ def compareDevAndTest(devFile, testFile):
     test['version'] = "test"
 
     firstColumn = ''.join(list(dev.columns[0]))
-    # secondColumn = ''.join(list(dev.columns[1]))
     createdColumn = ''.join(list(dev.columns[-4]))
-    # firstTwo = list(dev.columns[:2])
-    # print firstTwo
-    # print secondColumn
-
+    # Get all columns except for the version
     columnList = list(dev.columns[:-1])
-    # print columnList
 
     #Join all the data together and ignore indexes so it all gets added
     full_set = pd.concat([test,dev],ignore_index=True)
 
-    # Let's see what changes in the main columns we care about
+    # Drop all the duplicates, but keep the test version if so
     changes = full_set.drop_duplicates(subset=columnList)
 
     #We want to know where the duplicates are --> changes or duplicate named records
     # dupe_accts = changes.set_index('Name').index.get_duplicates()
     dupe_accts = changes.set_index(firstColumn,createdColumn).index.get_duplicates()
 
-    #Get all the duplicate rows
-    # dupes = changes[changes[secondColumn].isin(dupe_accts)]
-    dupes = changes[(changes[firstColumn].isin(dupe_accts))] #& changes[secondColumn].isin(dupe_accts))]
-
-    dupes = dupes.sort_values([firstColumn], ascending=True)
-    dupes = dupes.reindex()
+    # #Get all the duplicate rows
+    # # dupes = changes[changes[secondColumn].isin(dupe_accts)]
+    # dupes = changes[(changes[firstColumn].isin(dupe_accts))] #& changes[secondColumn].isin(dupe_accts))]
+    #
+    # dupes = dupes.sort_values([firstColumn], ascending=True)
+    # dupes = dupes.reindex()
 
     #Flag all duplicated names
     findDeletions=changes[firstColumn].isin(dupe_accts)
@@ -68,51 +63,38 @@ def compareDevAndTest(devFile, testFile):
 
 
     full_Unchanged = pd.merge(changes,changes2, how='inner',on=columnList)
-    full_Unchanged.to_excel('Both_Changes1.xlsx', index=False)
-    # todo I believe that trying is the real deal.
-    trying = full_Unchanged[(full_Unchanged.version_x=="test") & (full_Unchanged.version_y=="dev")]
-    trying.to_excel('Both_Changes2.xlsx', index=False)
+    unchanged = full_Unchanged[(full_Unchanged.version_x=="test") & (full_Unchanged.version_y=="dev")]
 
+    duplicate_Names = full_Unchanged.set_index(firstColumn, createdColumn).index.get_duplicates()
 
-    bleh
+    # Get all the duplicate rows
+    duplicate = full_Unchanged[(full_Unchanged[firstColumn].isin(duplicate_Names))]  # & changes[secondColumn].isin(dupe_accts))]
+    duplicate = duplicate.sort_values([firstColumn], ascending=True)
+    duplicate = duplicate.reindex()
+    # duplicate.to_excel('duplicate.xlsx', index=False)
 
-    # both = changes2[changes2.version != 'dev']
-    # changes.subtract(removed_accounts)
-    # both.to_excel('Both_Changes.xlsx', index=False)
+    test_only = full_Unchanged[(full_Unchanged.version_x=="test") & (full_Unchanged.version_y=="test")]
+    # test_only.to_excel('test_only1.xlsx', index=False)
+    test_only = test_only[-test_only.isin(duplicate_Names)]
+    test_only.dropna(subset=[firstColumn], inplace=True)
+    # test_only.to_excel('test_only2.xlsx', index=False)
 
-    # bleh
+    dev_only = full_Unchanged[(full_Unchanged.version_x=="dev") & (full_Unchanged.version_y=="dev")]
+    # test_only.to_excel('test_only1.xlsx', index=False)
+    dev_only = dev_only[-dev_only.isin(duplicate_Names)]
+    dev_only.dropna(subset=[firstColumn], inplace=True)
+    dev_only.to_excel('dev_only.xlsx', index=False)
 
-
-    # Both_Test_And_Dev = AllTest_AllDev.set_index(columnList).index.get_duplicates()
-    # both = AllTest_AllDev[(AllTest_AllDev[firstColumn].isin(Both_Test_And_Dev))] #& changes[secondColumn].isin(dupe_accts))]
-    # both.to_excel('Both_Changes.xlsx', index=False)
-    # bleh
-    # both = AllTest_AllDev.duplicated()
-    # both = both.sort_values([firstColumn], ascending=True)
-    # both = both.reindex()
-
-
-    # unchanged = changes[(findDeletions == False) & (changes["version"] == "test")]
-    # unchanged = set(unchanged).symmetric_difference(added_accounts)
-    # unchanged = unchanged[~unchanged.isin(added_accounts).all(1)]
-    # unchanged = unchanged[~unchanged.isin(added_accounts).all(1)]
-
-    # print unchanged[~unchanged.isin(added_accounts).all(1)]
-
-    # print unchanged -added_accounts
-
-    #Save the changes to excel but only include the columns we care about
-    # Save the changes to excel but only include the columns we care about
-    # print diff_output
     name = "C:\Users\steven.mitchell\Desktop\\Compare_Of_Folder\\" + "Compare_Of_" + devFile# + "x"
     # name = "C:\Users\steven.mitchell\Desktop\\Diction_Compare\\" + "Compare_Of_" + devFile# + "x"
 
     # print name
     writer = pd.ExcelWriter(name)
-    dupes.to_excel(writer, "Edited or Duplicated Name", index=False)
-    removed_accounts.to_excel(writer, "Only Dev", index=False)
-    added_accounts.to_excel(writer, "Only Test", index=False)
-    both.to_excel(writer, "Unchanged from Dev to Test", index=False)
+    duplicate.to_excel(writer, "Edited or Duplicated Name", index=False)
+    dev_only.to_excel(writer, "Only Dev", index=False)
+    test_only.to_excel(writer, "Only Test", index=False)
+    unchanged.to_excel(writer, "Unchanged from Dev to Test", index=False)
+
     writer.save()
     print('Done with:', devFile, ' comparison')
 
