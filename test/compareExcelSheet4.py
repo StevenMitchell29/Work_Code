@@ -48,8 +48,8 @@ def compareDevAndTest(devFile, testFile):
     duplicate_Names = full_Unchanged.set_index(firstColumn, createdColumn).index.get_duplicates()
     # Get all the duplicate or edited rows
     duplicate = full_Unchanged[(full_Unchanged[firstColumn].isin(duplicate_Names))]
-    # TODO test to see if this would take the dev test records out -> it did not
-    # duplicate = duplicate[(duplicate.version_x=="test") & (duplicate.version_y=="test") |(duplicate.version_x=="dev") & (duplicate.version_y=="dev")]
+    # TODO this might work
+    duplicate = duplicate[(duplicate.version_x=="test") & (duplicate.version_y=="test") |(duplicate.version_x=="dev") & (duplicate.version_y=="dev")]
 
     duplicate = duplicate.sort_values([firstColumn], ascending=True)
     duplicate = duplicate.reindex()
@@ -61,30 +61,20 @@ def compareDevAndTest(devFile, testFile):
     # test_only.to_excel('test_only2.xlsx', index=False)
 
     # get all the entries that appear in test only and not in duplicate
-    test_only = full_Unchanged[(full_Unchanged.version_x == "test") & (full_Unchanged.version_y == "test")]
+    # test_only = full_Unchanged[(full_Unchanged.version_x == "test") & (full_Unchanged.version_y == "test")]
     # test_only.to_excel('test_only1.xlsx', index=False)
-    test_only = test_only[-test_only.isin(duplicate_Names)]
-    test_only.dropna(subset=[firstColumn], inplace=True)
+    # test_only = test_only[-test_only.isin(duplicate_Names)]
+    # test_only.dropna(subset=[firstColumn], inplace=True)
     # test_only.to_excel('test_only2.xlsx', index=False)
 
     # get all records that appear in dev only
-    dev_only = full_Unchanged[(full_Unchanged.version_x=="dev") & (full_Unchanged.version_y=="dev")]
+    # dev_only = full_Unchanged[(full_Unchanged.version_x=="dev") & (full_Unchanged.version_y=="dev")]
     # test_only.to_excel('test_only1.xlsx', index=False)
-    dev_only = dev_only[-dev_only.isin(duplicate_Names)]
-    dev_only.dropna(subset=[firstColumn], inplace=True)
+    # dev_only = dev_only[-dev_only.isin(duplicate_Names)]
+    # dev_only.dropna(subset=[firstColumn], inplace=True)
     # dev_only.to_excel('dev_only.xlsx', index=False)
-
-    name = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\\Compare_Of_Folder\\" + "Compare_Of_" + devFile# + "x"
-    # name = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\\Diction_Compare\\" + "Compare_Of_" + devFile# + "x"
-
-    # print name
-    writer = pd.ExcelWriter(name)
-    duplicate.to_excel(writer, "Edited or Duplicated Name", index=False)
-    dev_only.to_excel(writer, "Only Dev", index=False)
-    test_only.to_excel(writer, "Only Test", index=False)
-    unchanged.to_excel(writer, "Unchanged from Dev to Test", index=False)
-    writer.save()
     print('Done with:', devFile, ' comparison')
+    return duplicate
 
 
 devPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Dev_Docs\\"
@@ -94,8 +84,13 @@ testPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abram
 # testPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Test_Diction\\"
 testDirectory = os.listdir(testPath)
 
+name = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\\Compare_Of_Folder2\\" + "Only comparisons" + ".xlsx"
+    # name = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\\Diction_Compare\\" + "Compare_Of_" + devFile# + "x"
+
+writer = pd.ExcelWriter(name)
 for devFile, testFile in zip(devDirectory,testDirectory):
     # print devFile, testFile
     print('Starting:', devFile, ' comparison')
-    compareDevAndTest(devFile,testFile)
-    # print "Done with 1 interation"
+    compareDevAndTest(devFile,testFile).to_excel(writer, devFile, index=False)
+
+writer.save()
