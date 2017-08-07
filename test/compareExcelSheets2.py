@@ -9,10 +9,10 @@ def report_diff(x):
 
 def compareDevAndTest(devFile, testFile):
     #sc_maintain_category.xls
-    devPath = "C:\Users\steven.mitchell\Desktop\Dev_Docs\\"
-    testPath = "C:\Users\steven.mitchell\Desktop\Test_Docs\\"#
-    # devPath = "C:\Users\steven.mitchell\Desktop\Dev_Diction\\"
-    # testPath = "C:\Users\steven.mitchell\Desktop\Test_Diction\\"
+    devPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Dev_Docs\\"
+    testPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Test_Docs\\"#
+    # devPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Dev_Diction\\"
+    # testPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Test_Diction\\"
 
     devFile1 = devPath + devFile
     testFile1 = testPath + testFile
@@ -74,7 +74,6 @@ def compareDevAndTest(devFile, testFile):
     trying.to_excel('Both_Changes2.xlsx', index=False)
 
 
-    bleh
 
     # both = changes2[changes2.version != 'dev']
     # changes.subtract(removed_accounts)

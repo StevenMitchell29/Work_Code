@@ -53,15 +53,14 @@ def compareDevAndTest(devFile, testFile):
     # TODO So now I think that this works because of get_name below
     duplicate = duplicate[(duplicate.version_x=="test") & (duplicate.version_y=="test") |(duplicate.version_x=="dev") & (duplicate.version_y=="dev")]
 
-
+    # get a list of all the names in this updated set
     get_names = duplicate.set_index(firstColumn).index.get_duplicates()
-    # print get_names
-    # bleh
+
     duplicate = duplicate.sort_values([firstColumn], ascending=True)
     duplicate = duplicate.reindex()
     # duplicate.to_excel('duplicate.xlsx', index=False)
 
-    # remove all the entries from unchaged so they only appear in duplicates
+    # remove all the entries from unchanged so they only appear in duplicates
     unchanged = unchanged[-unchanged.isin(get_names)]#duplicate_Names)]
     unchanged.dropna(subset=[firstColumn], inplace=True)
     # test_only.to_excel('test_only2.xlsx', index=False)
@@ -79,19 +78,17 @@ def compareDevAndTest(devFile, testFile):
     dev_only = dev_only[-dev_only.isin(get_names)]#duplicate_Names)]
     dev_only.dropna(subset=[firstColumn], inplace=True)
     # dev_only.to_excel('dev_only.xlsx', index=False)
-    print('Done with:', devFile, ' comparison')
 
-    name = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\\Compare_Of_Folder3\\" + devFile# + "x"
+    name = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\\Compare_Of_Folder\\" + "Compare_Of_" + devFile  # + "x"
+    # name = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\\Diction_Compare\\" + "Compare_Of_" + devFile# + "x"
 
-    # print name
     writer = pd.ExcelWriter(name)
-    duplicate.to_excel(writer, "Edited or Duplicated Name", index=False)
+    duplicate.to_excel(writer, "Edited", index=False)
     dev_only.to_excel(writer, "Only Dev", index=False)
     test_only.to_excel(writer, "Only Test", index=False)
     unchanged.to_excel(writer, "Unchanged from Dev to Test", index=False)
     writer.save()
-
-    # return duplicate
+    print('Done with:', devFile, ' comparison')
 
 
 devPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Dev_Docs\\"
@@ -101,13 +98,9 @@ testPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abram
 # testPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Test_Diction\\"
 testDirectory = os.listdir(testPath)
 
-name = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\\Compare_Of_Folder2\\" + "test_Only comparisons" + ".xlsx"
-    # name = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\\Diction_Compare\\" + "Compare_Of_" + devFile# + "x"
-
-writer = pd.ExcelWriter(name)
 for devFile, testFile in zip(devDirectory,testDirectory):
     # print devFile, testFile
     print('Starting:', devFile, ' comparison')
-    compareDevAndTest(devFile,testFile)#.to_excel(writer, devFile, index=False)
+    compareDevAndTest(devFile,testFile)
 
 # writer.save()

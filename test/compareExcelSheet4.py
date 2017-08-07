@@ -8,11 +8,10 @@ def report_diff(x):
     return x[0] if x[0] == x[1] else '{} ---> {}'.format(*x)
 
 def compareDevAndTest(devFile, testFile):
-    #sc_maintain_category.xls
-    devPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Dev_Docs\\"
-    testPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Test_Docs\\"#
-    # devPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Dev_Diction\\"
-    # testPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Test_Diction\\"
+    # devPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Dev_Docs\\"
+    # testPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Test_Docs\\"#
+    devPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Dev_Diction\\"
+    testPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Test_Diction\\"
 
     devFile1 = devPath + devFile
     testFile1 = testPath + testFile
@@ -48,49 +47,54 @@ def compareDevAndTest(devFile, testFile):
     duplicate_Names = full_Unchanged.set_index(firstColumn, createdColumn).index.get_duplicates()
     # Get all the duplicate or edited rows
     duplicate = full_Unchanged[(full_Unchanged[firstColumn].isin(duplicate_Names))]
-    # TODO this might work
+    # TODO this might work --> it does not --> it kinda does the problem is that the records with a duplicate name
+    # TODO still show up in duplicate_Names so when the difference is done they are removed
+    # TODO So now I think that this works because of get_name below
     duplicate = duplicate[(duplicate.version_x=="test") & (duplicate.version_y=="test") |(duplicate.version_x=="dev") & (duplicate.version_y=="dev")]
+
+
+    get_names = duplicate.set_index(firstColumn).index.get_duplicates()
 
     duplicate = duplicate.sort_values([firstColumn], ascending=True)
     duplicate = duplicate.reindex()
     # duplicate.to_excel('duplicate.xlsx', index=False)
 
     # remove all the entries from unchaged so they only appear in duplicates
-    unchanged = unchanged[-unchanged.isin(duplicate_Names)]
+    unchanged = unchanged[-unchanged.isin(get_names)]#duplicate_Names)]
     unchanged.dropna(subset=[firstColumn], inplace=True)
     # test_only.to_excel('test_only2.xlsx', index=False)
 
     # get all the entries that appear in test only and not in duplicate
     # test_only = full_Unchanged[(full_Unchanged.version_x == "test") & (full_Unchanged.version_y == "test")]
     # test_only.to_excel('test_only1.xlsx', index=False)
-    # test_only = test_only[-test_only.isin(duplicate_Names)]
+    # test_only = test_only[-test_only.isin(get_names)]#duplicate_Names)]
     # test_only.dropna(subset=[firstColumn], inplace=True)
     # test_only.to_excel('test_only2.xlsx', index=False)
 
     # get all records that appear in dev only
     # dev_only = full_Unchanged[(full_Unchanged.version_x=="dev") & (full_Unchanged.version_y=="dev")]
     # test_only.to_excel('test_only1.xlsx', index=False)
-    # dev_only = dev_only[-dev_only.isin(duplicate_Names)]
+    # dev_only = dev_only[-dev_only.isin(get_names)]#duplicate_Names)]
     # dev_only.dropna(subset=[firstColumn], inplace=True)
     # dev_only.to_excel('dev_only.xlsx', index=False)
-    print('Done with:', devFile, ' comparison')
     return duplicate
 
 
-devPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Dev_Docs\\"
-# devPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Dev_Diction\\"
+# devPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Dev_Docs\\"
+devPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Dev_Diction\\"
 devDirectory = os.listdir(devPath)
-testPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Test_Docs\\"
-# testPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Test_Diction\\"
+# testPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Test_Docs\\"
+testPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Test_Diction\\"
 testDirectory = os.listdir(testPath)
 
-name = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\\Compare_Of_Folder2\\" + "Only comparisons" + ".xlsx"
-    # name = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\\Diction_Compare\\" + "Compare_Of_" + devFile# + "x"
+# name = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\\Compare_Of_Folder\\" + "Only_comparisons" + ".xlsx"
+name = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\\Diction_Compare\\" + "Only_Dict_Comparisons"+ ".xlsx"
 
 writer = pd.ExcelWriter(name)
 for devFile, testFile in zip(devDirectory,testDirectory):
     # print devFile, testFile
     print('Starting:', devFile, ' comparison')
     compareDevAndTest(devFile,testFile).to_excel(writer, devFile, index=False)
+    print('Done with:', devFile, ' comparison')
 
 writer.save()
