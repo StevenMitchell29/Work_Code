@@ -43,14 +43,44 @@ def compareDevAndTest(devFile, testFile):
 
     # and find all of the records that were unchanged from dev to test
     unchanged = full_Unchanged[(full_Unchanged.version_x=="test") & (full_Unchanged.version_y=="dev")]
+    full_Unchanged = full_Unchanged[-full_Unchanged.isin(unchanged)]
+    full_Unchanged.dropna(subset=[firstColumn], inplace=True)
+    # full_Unchanged.to_excel('full_Unchanged.xlsx', index=False)
+
+    test = full_Unchanged.duplicated(subset=columnList[:-2])
+    # full_Unchanged[test].to_excel('full_Unchanged2.xlsx', index=False)
+    # full_Unchanged[test].to_excel('full_Unchanged2.xlsx', index=False)
+    dev_edited = full_Unchanged[test]
+    dev_edited = dev_edited.drop(['version_x'], axis=1)
+    dev_edited = dev_edited.drop(['version_y'], axis=1)
+    dev_edited['version'] = "dev"
+    dev_edited.to_excel('full_Unchanged2.xlsx', index=False)
+    # Drop the temp columns - we don't need them now
+
+    test2 = full_Unchanged.duplicated(subset=columnList[:-2],keep='last')
+    test_edited = full_Unchanged[test2]
+    test_edited = test_edited.drop(['version_x'], axis=1)
+    test_edited = test_edited.drop(['version_y'], axis=1)
+    test_edited['version'] = "test"
+    test_edited.to_excel('full_Unchanged3.xlsx', index=False)
+
+    prelim_merge = pd.merge(dev_edited,test_edited, how='inner',on=columnList[:-2])
+    prelim_merge.to_excel('full_Unchanged4.xlsx', index=False)
+    # TODO so now testing looks good you just have to remove all files with conditions dev dev or test test
+    upgraded_set = prelim_merge[-(prelim_merge.version_x=="test") & (prelim_merge.version_y=="test") |(prelim_merge.version_x=="dev") & (prelim_merge.version_y=="dev")]
+    upgraded_set.to_excel('full_Unchanged5.xlsx', index=False)
+
+    full_Unchanged = full_Unchanged[-full_Unchanged.isin(upgraded_set)]
+    full_Unchanged.dropna(subset=[firstColumn], inplace=True)
+    full_Unchanged.to_excel('full_Unchanged.xlsx', index=False)
+
+
+    bleh
     # get all the duplicate names and creation dates that appear in both
     # TODO this may not catch all records that are the same if they do not have the same creation date
     duplicate_Names = full_Unchanged.set_index(firstColumn).index.get_duplicates()
     # Get all the duplicate or edited rows
     duplicate = full_Unchanged[(full_Unchanged[firstColumn].isin(duplicate_Names))]
-    # TODO this might work --> it does not --> it kinda does the problem is that the records with a duplicate name
-    # TODO still show up in duplicate_Names so when the difference is done they are removed
-    # TODO So now I think that this works because of get_name below
     duplicate = duplicate[(duplicate.version_x=="test") & (duplicate.version_y=="test") |(duplicate.version_x=="dev") & (duplicate.version_y=="dev")]
 
     # get a list of all the names in this updated set
@@ -61,7 +91,7 @@ def compareDevAndTest(devFile, testFile):
     # duplicate.to_excel('duplicate.xlsx', index=False)
 
     # remove all the entries from unchanged so they only appear in duplicates
-    unchanged = unchanged[-unchanged.isin(get_names)]#duplicate_Names)]
+    unchanged = unchanged[-unchanged.isin(get_names)]
     unchanged.dropna(subset=[firstColumn], inplace=True)
     # test_only.to_excel('test_only2.xlsx', index=False)
 
