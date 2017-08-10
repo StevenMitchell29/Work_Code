@@ -9,10 +9,10 @@ def report_diff(x):
 
 def compareDevAndTest(devFile, testFile):
     #sc_maintain_category.xls
-    devPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Dev_Docs\\"
-    testPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Test_Docs\\"#
-    # devPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Dev_Diction\\"
-    # testPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Test_Diction\\"
+    # devPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Dev_Docs\\"
+    # testPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Test_Docs\\"#
+    devPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Dev_Diction\\"
+    testPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Test_Diction\\"
 
     devFile1 = devPath + devFile
     testFile1 = testPath + testFile
@@ -48,16 +48,15 @@ def compareDevAndTest(devFile, testFile):
     full_Unchanged.dropna(subset=[firstColumn], inplace=True)
     # full_Unchanged.to_excel('full_Unchanged.xlsx', index=False)
 
-    # Get all records that are duplicates for everything except updated and updated by
+    # Get all records that are duplicates for everything except updated and updated by--> most likely upgrades
     test = full_Unchanged.duplicated(subset=columnList[:-2])
 
     # get all the dev versions first
     dev_edited = full_Unchanged[test]
-    # edit all the columns
+    # dev_edited.to_excel('full_Unchanged2.xlsx', index=False)
     # make sure that no test records are randomly mixed within
-    dev_edited.to_excel('full_Unchanged2.xlsx', index=False)
-
     dev_edited = dev_edited[(dev_edited.version_x == "dev") & (dev_edited.version_y =="dev")]
+    # edit the version columns
     dev_edited = dev_edited.drop(['version_x'], axis=1)
     dev_edited = dev_edited.drop(['version_y'], axis=1)
     dev_edited['version'] = "dev"
@@ -71,101 +70,27 @@ def compareDevAndTest(devFile, testFile):
     test_edited = test_edited.drop(['version_x'], axis=1)
     test_edited = test_edited.drop(['version_y'], axis=1)
     test_edited['version'] = "test"
-    # test_edited.to_excel('full_Unchanged3.xlsx', index=False)
 
-    # testing = pd.merge(test_edited,dev_edited, how='outer',on=columnList)
-    # testing = testing.drop_duplicates(subset=columnList[:-2],keep=False)
-
-    # testing.to_excel('full_Unchanged_.xlsx',index=False)
-    # bleh
+    # merge the two sheets together for an 'intersection' on the same columns
     prelim_merge = pd.merge(dev_edited,test_edited, how='inner',on=columnList[:-2])
-    prelim_merge.to_excel('full_Unchanged4.xlsx', index=False)
-    # TODO so now testing looks good you just have to remove all files with conditions dev dev or test test
-    # the 2 lines below look redundant
-    # upgraded_set = prelim_merge[((prelim_merge.version_x=="test") & (prelim_merge.version_y=="test") |(prelim_merge.version_x=="dev") & (prelim_merge.version_y=="dev"))]
-    # upgraded_set.to_excel('full_Unchanged5.xlsx', index=False)
+    # prelim_merge.to_excel('full_Unchanged4.xlsx', index=False)
 
-
+    # sort
     prelim_merge = prelim_merge.sort_values([firstColumn], ascending=True)
     prelim_merge = prelim_merge.reindex()
 
+    # sort
     full_Unchanged = full_Unchanged.sort_values([firstColumn], ascending=True)
     full_Unchanged = full_Unchanged.reindex()
 
-    # full_Unchanged2 = full_Unchanged
-    # for row in prelim_merge.itertuples():
-    #     for row2 in full_Unchanged.itertuples():
-    #         if row[firstColumn] == row2[firstColumn]:
-            # if row[1:8] == row2[1:8]:
-                # print row2[1:8]
-                # full_Unchanged2 = full_Unchanged2[row2[1]]
-                # dev_and_test_only  = dev_and_test_only.concat([dev_and_test_only,row2],ignore_index=True)#,ignore_index=True)
-
-    # full_Unchanged2.to_excel('full_Unchanged_.xlsx', index=False)
-    # testing = pd.concat([full_Unchanged,prelim_merge])
-    # testing = testing[columnList]
-    # testing.to_excel('full_Unchanged_.xlsx', index=False)
-    # TODO So what am I trying to do.  I am trying to remove all records from one data frame from another
-    # TODO if they appear there.  If the records has the same values up to a certain point then delte
-    # testing.drop_duplicates(keep=False)
-    # testing = testing.sort_values([firstColumn], ascending=True)
-    # testing = testing.reindex()
-    # testing.to_excel('full_Unchanged_.xlsx', index=False)
-
-
-    # bleh
-    # testing = full_Unchanged[(full_Unchanged.version_x == "test") & (full_Unchanged.version_y == "test")]  # (prelim_merge[firstColumn])]
-    #
-    # testing = testing[-testing.isin(prelim_merge[firstColumn])]
-    # testing.dropna(subset=[firstColumn], inplace=True)
-    # testing.to_excel('full_Unchanged.xlsx', index=False)
-
-    # full_Unchanged.dropna(subset=[firstColumn], inplace=True)
-
-    # bleh
-    # get all the duplicate names and creation dates that appear in both
-    # duplicate_Names = full_Unchanged.set_index(firstColumn).index.get_duplicates()
-    # Get all the duplicate or edited rows
-    # duplicate = full_Unchanged[(full_Unchanged[firstColumn].isin(duplicate_Names))]
-    # duplicate = duplicate[(duplicate.version_x=="test") & (duplicate.version_y=="test") |(duplicate.version_x=="dev") & (duplicate.version_y=="dev")]
-
-    # get a list of all the names in this updated set
-    # get_names = duplicate.set_index(firstColumn,createdColumn).index.get_duplicates()
-
-    # duplicate = duplicate.sort_values([firstColumn], ascending=True)
-    # duplicate = duplicate.reindex()
-    # duplicate.to_excel('duplicate.xlsx', index=False)
-
-    # remove all the entries from unchanged so they only appear in duplicates
-    # unchanged = unchanged[-unchanged.isin(get_names)]
-    # unchanged.dropna(subset=[firstColumn], inplace=True)
-    # test_only.to_excel('test_only2.xlsx', index=False)
-
-    # get all the entries that appear in test only and not in duplicate
-    # testing = pd.concat([full_Unchanged, prelim_merge])
-    # testing = testing[columnList]
-    # testing.to_excel('full_Unchanged_.xlsx', index=False)
-    # TODO So what am I trying to do.  I am trying to remove all records from one data frame from another
-    # TODO if they appear there.  If the records has the same values up to a certain point then delte
-    # testing.drop_duplicates(keep=False)
-    # testing = testing.sort_values([firstColumn], ascending=True)
-    # testing = testing.reindex()
-    # testing.to_excel('full_Unchanged_.xlsx', index=False)
-
+    # find all records that are in only test
     test_only = full_Unchanged[(full_Unchanged.version_x == "test") & (full_Unchanged.version_y == "test")]
     test_only = pd.concat([test_only,test_edited])
-    test_only = test_only.drop_duplicates(subset=columnList,keep=False)
+    # remove all records that are found in test_edited
+    test_only = test_only.drop_duplicates(subset=columnList[:-2],keep=False)
     test_only = test_only[columnList]
     test_only['version'] = "test"
-    test_only.to_excel('test_only.xlsx', index=False)
-
-    # testing = pd.merge(test_edited,dev_edited, how='outer',on=columnList)
-    # testing = testing.drop_duplicates(subset=columnList[:-2],keep=False)
-
-    # test_only.to_excel('test_only1.xlsx', index=False)
-    # test_only = test_only[-test_only.isin(get_names)]#duplicate_Names)]
-    # test_only.dropna(subset=[firstColumn], inplace=True)
-    # test_only.to_excel('test_only2.xlsx', index=False)
+    test_only.to_excel('test_only1.xlsx', index=False)
 
     # get all records that appear in dev only
     dev_only = full_Unchanged[(full_Unchanged.version_x == "dev") & (full_Unchanged.version_y == "dev")]
@@ -175,14 +100,8 @@ def compareDevAndTest(devFile, testFile):
     dev_only['version'] = "dev"
     dev_only.to_excel('dev_only.xlsx', index=False)
 
-    # dev_only = full_Unchanged[(full_Unchanged.version_x=="dev") & (full_Unchanged.version_y=="dev")]
-    # test_only.to_excel('test_only1.xlsx', index=False)
-    # dev_only = dev_only[-dev_only.isin(get_names)]#duplicate_Names)]
-    # dev_only.dropna(subset=[firstColumn], inplace=True)
-    # dev_only.to_excel('dev_only.xlsx', index=False)
-
-    name = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\\Compare_Of_Folder\\" + "Compare_Of_" + devFile  # + "x"
-    # name = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\\Diction_Compare\\" + "Compare_Of_" + devFile# + "x"
+    # name = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\\Compare_Of_Folder\\" + "Compare_Of_" + devFile  # + "x"
+    name = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\\Diction_Compare\\" + "Compare_Of_" + devFile# + "x"
 
     writer = pd.ExcelWriter(name)
     prelim_merge.to_excel(writer, "Edited", index=False)
@@ -193,11 +112,11 @@ def compareDevAndTest(devFile, testFile):
     print('Done with:', devFile, ' comparison')
 
 
-devPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Dev_Docs\\"
-# devPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Dev_Diction\\"
+# devPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Dev_Docs\\"
+devPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Dev_Diction\\"
 devDirectory = os.listdir(devPath)
-testPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Test_Docs\\"
-# testPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Test_Diction\\"
+# testPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Test_Docs\\"
+testPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Test_Diction\\"
 testDirectory = os.listdir(testPath)
 
 for devFile, testFile in zip(devDirectory,testDirectory):
