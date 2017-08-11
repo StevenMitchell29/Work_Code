@@ -33,6 +33,7 @@ def compareDevAndTest(devFile, testFile):
 
     # Drop all the duplicates, but keep the test version if so
     changes = full_set.drop_duplicates(subset=columnList)
+    # changes.to_excel('changes.xlsx', index=False)
     # drop all the duplicates, but keep the dev version if so
     changes2 = full_set.drop_duplicates(subset=columnList,keep='last')
 
@@ -46,7 +47,7 @@ def compareDevAndTest(devFile, testFile):
     full_Unchanged[firstColumn].replace('', np.nan, inplace=True)
     full_Unchanged.dropna(subset=[firstColumn], inplace=True)
     # full_Unchanged.to_excel('full_Unchanged.xlsx', index=False)
-
+    # bleh
     # Get all records that are duplicates for everything except updated and updated by--> most likely upgrades
     test = full_Unchanged.duplicated(subset=columnList[:-2])
 
