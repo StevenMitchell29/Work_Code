@@ -8,7 +8,6 @@ def report_diff(x):
     return x[0] if x[0] == x[1] else '{} ---> {}'.format(*x)
 
 def compareDevAndTest(devFile, testFile):
-    #sc_maintain_category.xls
     # devPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Dev_Docs\\"
     # testPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Test_Docs\\"#
     devPath = "C:\Users\steven.mitchell\OneDrive - Accenture Federal Services\Abrams\Upgrade Validation\Dev_Diction\\"
